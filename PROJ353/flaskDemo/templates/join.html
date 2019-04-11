@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+	  {% for row in joined_m_n %}
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+              <h2><a class="article-title" href="{{ url_for('empl', ssn=row.ssn, pno=row.pnumber) }}">{{ row.ssn}}</a></h2>
+              <small class="text-muted">{{ row.pname}} {{ row.pnumber }}  {{ row.lname }}</small>
+            </div>
+
+          </div>
+        </article>
+     {% endfor %}
+
+{% endblock content %}

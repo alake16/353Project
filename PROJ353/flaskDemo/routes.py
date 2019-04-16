@@ -3,17 +3,49 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskDemo import app, db, bcrypt
-from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm
-from flaskDemo.models import Users
+from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm
+from flaskDemo.models import Users, products, Admin
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 
 
-@app.route("/")
+
 @app.route("/home")
 def home():
-    
-    return redirect(url_for('login'))
+    Admins = db.session.query(Admin.adminID)
+    for row in Admins:
+        print (row[0])
+    return render_template('home.html', title='home')
+
+
+@app.route("/products", methods=['GET','POST'])
+@login_required
+def displayProducts():
+    productsList = db.session.query(products.productName, products.productID).all()
+    displayProduct = list()
+    for row in productsList:
+        print (row)
+    return render_template('products.html', products = productsList, title = 'products')
+
+
+@app.route("/product/<productID>", methods = ['GET', 'POST'])
+@login_required
+def indiProduct(productID):
+    indiProd = products.query.get(productID)
+    price = indiProd.price
+    return render_template('indiProd.html', title = 'indiProd', productName = indiProd.productName, price = price)
+
+@app.route("/adminPage", methods = ['Get', 'POST'])
+@login_required
+def adminPage():
+    form = addNewForm()
+    if form.validate_on_submit():
+        prod = products(productID = form.productID.data, productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data)
+        db.session.add(prod)
+        db.session.commit()
+        flash('product added', 'sucess')
+    return render_template('admin.html', title = 'ADMIN', form =form)
+
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -27,10 +59,10 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('home', userID = user.userID))
     return render_template('register.html', title='Register', form=form)
 
-
+@app.route("/")
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -40,6 +72,11 @@ def login():
         user = Users.query.filter_by(name=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
+            flash('login successful', 'success')
+            Admins = db.session.query(Admin.adminID)
+            for row in Admins:
+                if row.adminID == user.userID:
+                    return redirect(url_for('adminPage'))
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:

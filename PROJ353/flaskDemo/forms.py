@@ -24,6 +24,13 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('That username is taken. Please choose a different one.')
 
 
+class addNewForm(FlaskForm):
+    productID = IntegerField('productID', validators = [DataRequired()])
+    productName = StringField('product Name')
+    productPrice = IntegerField('product Price')
+    categoryID = IntegerField('category')
+    submit = SubmitField('ADD')
+
 
 class LoginForm(FlaskForm):
     username = StringField('username',

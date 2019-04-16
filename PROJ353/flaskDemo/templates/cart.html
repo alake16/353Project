@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block content %}
+{% for product in cart %}
+    <article class="media content-section">
+      <a class="mr-2" href="#">{{ product["productName"] }} Price: {{product["price"]}}</a>
+    </article>
+{% endfor %}
+<br>
+Total : {{total}}
+
+{% endblock content %}

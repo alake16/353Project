@@ -8,7 +8,7 @@ from flaskDemo.models import Users, products, Admin
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 
-
+cartList = list()
 
 @app.route("/home")
 def home():
@@ -32,8 +32,30 @@ def displayProducts():
 @login_required
 def indiProduct(productID):
     indiProd = products.query.get(productID)
-    price = indiProd.price
-    return render_template('indiProd.html', title = 'indiProd', productName = indiProd.productName, price = price)
+    
+    return render_template('indiProd.html', title = 'indiProd',product = indiProd)
+
+@app.route("/cart/<addItem>", methods = ['GET', 'POST'])
+def addCart(addItem):
+    price = 0
+    prod = products.query.get(addItem)
+    cartList.append(prod)
+    for row in cartList:
+        price += row.price
+    return render_template('cart.html', cart = cartList, title = 'Cart', total = price)
+
+@app.route("/cart", methods = ['GET', 'POST'])
+def cart():
+    price = 0
+    for row in cartList:
+        price += row.price
+    return render_template('cart.html', cart = cartList, title = 'Cart', total = price)
+
+@app.route("/displayCategory/<category>", methods = ['GET', 'POST'])
+def displayCategory(category):
+    prods = db.session.query(products).filter(products.categoryID.in_((category))).all()
+    print (prods)
+    return render_template('displayCategory.html', products = prods, title = products)
 
 @app.route("/adminPage", methods = ['Get', 'POST'])
 @login_required

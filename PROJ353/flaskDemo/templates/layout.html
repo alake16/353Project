@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html>
+<style>
+.main {
+  margin-left: 140px; /* Same width as the sidebar + left position in px */
+  font-size: 28px; /* Increased text to enable scrolling */
+  padding: 0px 10px;
+}
+</style>
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -11,28 +18,29 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 
     {% if title %}
-        <title>Department CRUD - {{ title }}</title>
+        <title>Comp Store - {{ title }}</title>
     {% else %}
-        <title>Department CRUD</title>
+        <title>Comp Store</title>
     {% endif %}
 </head>
 <body>
     <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-          <a class="navbar-brand mr-4" href="/">Department CRUD</a>
+          <a class="navbar-brand mr-4" href="/">Comp store</a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
-
+              <a class="nav-item nav-link" href="{{ url_for('displayProducts') }}">products</a>
+              <a class="nav-item nav-link" href="{{ url_for('cart') }}">Cart</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if current_user.is_authenticated %}
-        
+
                 <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
               {% else %}

@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+{% for product in products %}
+    <article class="media content-section">
+
+      <h1><a class="article-title" href="{{ url_for('indiProduct', productID=product["productID"])}}">{{ product["productName"] }}</a></h1>
+
+
+    </article>
+{% endfor %}
+<h1><a class="article-title" href="{{ url_for('displayProducts')}}">Back to all products</a></h1>
+{% endblock content %}

@@ -1,5 +1,30 @@
 {% extends "layout.html" %}
 {% block content %}
+<style>
+.sidenav {
+
+  width: 100px;
+  position: fixed;
+  z-index: 1;
+  top: 100;
+  left: 0;
+  background-color: #eee;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+.main {
+  margin-left: 140px; /* Same width as the sidebar + left position in px */
+  font-size: 28px; /* Increased text to enable scrolling */
+  padding: 0px 10px;
+}
+</style>
+<div class="sidenav">
+  <a href="{{url_for('displayCategory', category = 1)}}">CPU</a><br>
+  <a href="#">MotherBoard</a><br>
+  <a href="#">Memory</a><br>
+  <a href="#">Storage</a><br>
+</div>
+<div class ="main">
     {% for product in products %}
         <article class="media content-section">
 
@@ -8,4 +33,6 @@
 
         </article>
     {% endfor %}
+</div>
+
 {% endblock content %}

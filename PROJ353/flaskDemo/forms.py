@@ -5,8 +5,15 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextA
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError,Regexp
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flaskDemo import db
-from flaskDemo.models import Users
+from flaskDemo.models import Users, category
 from wtforms.fields.html5 import DateField
+
+possCategories = category.query.all()
+print(possCategories)
+categoryResults=list()
+
+myChoices = [(row.categoryID, row.categoryname) for row in possCategories]
+print(myChoices)
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
@@ -25,10 +32,11 @@ class RegistrationForm(FlaskForm):
 
 
 class addNewForm(FlaskForm):
+    print(possCategories)
     productID = IntegerField('productID', validators = [DataRequired()])
     productName = StringField('product Name')
     productPrice = IntegerField('product Price')
-    categoryID = IntegerField('category')
+    categoryID = SelectField('category', choices = myChoices, coerce = int)
     submit = SubmitField('ADD')
 
 

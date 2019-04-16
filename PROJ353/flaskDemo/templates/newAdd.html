@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
+Add a new product
 	  {% for row in SSNS %}
         <article class="media content-section">
           <div class="media-body">
             <div class="article-metadata">
               <h2><a class="article-title" href="{{ url_for('add2', ssn=row.ssn) }}">{{ row.ssn}}</a></h2>
-              
+
             </div>
 
           </div>

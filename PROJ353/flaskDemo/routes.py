@@ -10,6 +10,7 @@ from datetime import datetime
 
 cartList = list()
 
+
 @app.route("/home")
 def home():
     Admins = db.session.query(Admin.adminID)
@@ -63,9 +64,14 @@ def adminPage():
     form = addNewForm()
     if form.validate_on_submit():
         prod = products(productID = form.productID.data, productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data)
-        db.session.add(prod)
-        db.session.commit()
-        flash('product added', 'sucess')
+        checker = products.query.get(form.productID.data)
+        if checker:
+            flash('productID taken, Retry', 'success')
+            return redirect(url_for('adminPage'))
+        else:
+            db.session.add(prod)
+            db.session.commit()
+            flash('product added', 'sucess')
     return render_template('admin.html', title = 'ADMIN', form =form)
 
 
@@ -98,6 +104,7 @@ def login():
             Admins = db.session.query(Admin.adminID)
             for row in Admins:
                 if row.adminID == user.userID:
+                    flash(current_user.get_id(), 'success')
                     return redirect(url_for('adminPage'))
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home'))

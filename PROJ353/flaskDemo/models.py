@@ -32,7 +32,8 @@ class Admin(db.Model):
     def __repr__(self):
         return f"User('{self.adminID}')"
 
-
+class category(db.Model):
+    __table__ = db.Model.metadata.tables['category']
 
 class products(db.Model):
     __table_args__ = {'extend_existing': True}

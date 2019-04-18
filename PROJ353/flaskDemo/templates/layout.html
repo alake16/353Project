@@ -39,6 +39,7 @@
               {%if current_user.get_id() ==1%}
               <a class="nav-item nav-link" href="{{ url_for('adminPage') }}">admin</a>
               {%endif%}
+              <a class="nav-item nav-link" href="{{ url_for('customBuild') }}">Build Your Own</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">

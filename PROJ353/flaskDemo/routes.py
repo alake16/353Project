@@ -3,10 +3,11 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskDemo import app, db, bcrypt
-from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm
-from flaskDemo.models import Users, products, Admin
+from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm
+from flaskDemo.models import Users, products, Admin, orders, order_line, category
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
+from sqlalchemy import func
 
 cartList = list()
 
@@ -19,8 +20,74 @@ def home():
     return render_template('home.html', title='home')
 
 
+@app.route("/order/<total>", methods = ['GET','POST'])
+def order(total):
+    user = Users.query.get(current_user.get_id())
+    newOrder = orders(custID = user.userID, totalPrice = total)
+    db.session.add(newOrder)
+    db.session.commit()
+    return redirect(url_for('orderLine'))
+
+@app.route("/orderLine", methods = ['GET', 'POST'])
+def orderLine():
+    user = Users.query.get(current_user.get_id())
+    orderNumber = db.session.query(func.max(orders.orderID)).scalar()
+    for row in cartList:
+        newOrderLine = order_line( orderID = orderNumber,custID = user.userID, quantity = 1, productID = row.productID)
+        db.session.add(newOrderLine)
+        db.session.commit()
+    return redirect(url_for('home'))
+
+@app.route("/customBuild", methods = ['GET', 'POST'])
+def customBuild():
+    form = customBuildForm()
+    if form.validate_on_submit():
+        cpu = products.query.get(form.CPU.data)
+        cartList.append(cpu)
+        
+        mem = products.query.get(form.Memory.data)
+        cartList.append(mem)
+
+        stor = products.query.get(form.Storage.data)
+        cartList.append(stor)
+
+        power = products.query.get(form.power.data)
+        cartList.append(power)
+
+        gpu = products.query.get(form.gpu.data)
+        cartList.append(gpu)
+
+        fan = products.query.get(form.fan.data)
+        cartList.append(fan)
+        
+        mother = products.query.get(form.mother.data)
+        cartList.append(mother)
+        return redirect(url_for('cart'))
+    
+    return render_template('customBuild.html', form = form)
+
+
+
+@app.route("/userCheckout/<total>", methods = ['GET', 'POST'])
+def userCheckout(total):
+    user = Users.query.get(current_user.get_id())
+    return render_template('userCheckOut.html', user = user, total = total)
+
+@app.route("/guestCheckout/<total>", methods = ['GET', 'POST'])
+def guestCheckout(total):
+    form = guestCheckoutForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = Users(name=form.username.data, address=form.address.data, password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        login_user(user, remember=form.remember.data)
+        return redirect(url_for('home'))
+    return render_template('guestCheckOut.html', form = form )
+
+
+
 @app.route("/products", methods=['GET','POST'])
-@login_required
 def displayProducts():
     productsList = db.session.query(products.productName, products.productID).all()
     displayProduct = list()
@@ -30,7 +97,6 @@ def displayProducts():
 
 
 @app.route("/product/<productID>", methods = ['GET', 'POST'])
-@login_required
 def indiProduct(productID):
     indiProd = products.query.get(productID)
     
@@ -61,17 +127,20 @@ def displayCategory(category):
 @app.route("/adminPage", methods = ['Get', 'POST'])
 @login_required
 def adminPage():
+    possCategories = category.query.all()
+    myChoices = [(row.categoryID, row.categoryname) for row in possCategories]
+    print(myChoices)
+    possMem = db.session.query(products).filter_by(categoryID = 2)
+    memChoices = [(row.productID, row.productName) for row in possMem]
+    print(memChoices)
+    
     form = addNewForm()
     if form.validate_on_submit():
-        prod = products(productID = form.productID.data, productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data)
-        checker = products.query.get(form.productID.data)
-        if checker:
-            flash('productID taken, Retry', 'success')
-            return redirect(url_for('adminPage'))
-        else:
-            db.session.add(prod)
-            db.session.commit()
-            flash('product added', 'sucess')
+        prod = products(productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data)
+        db.session.add(prod)
+        db.session.commit()
+        flash('product added', 'sucess')
+        return redirect(url_for('adminPage'))
     return render_template('admin.html', title = 'ADMIN', form =form)
 
 

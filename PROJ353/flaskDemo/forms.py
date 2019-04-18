@@ -5,15 +5,36 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextA
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError,Regexp
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flaskDemo import db
-from flaskDemo.models import Users, category
+from flaskDemo.models import Users, category, products
 from wtforms.fields.html5 import DateField
 
 possCategories = category.query.all()
-print(possCategories)
-categoryResults=list()
-
 myChoices = [(row.categoryID, row.categoryname) for row in possCategories]
-print(myChoices)
+
+possCPU = db.session.query(products).filter_by(categoryID = 1)
+#for row in possCPU:
+#    if row.categoryID == 1
+#        cpuList.append(row)
+cpuChoices = [(row.productID, row.productName) for row in possCPU]
+
+
+possMem = db.session.query(products).filter_by(categoryID = 2)
+memChoices = [(row.productID, row.productName) for row in possMem]
+
+possStorage = db.session.query(products).filter_by(categoryID = 3)
+storageChoices = [(row.productID, row.productName) for row in possStorage]
+
+possPower  = db.session.query(products).filter_by(categoryID = 4)
+powerChoices = [(row.productID, row.productName) for row in possPower]
+
+possGPU = db.session.query(products).filter_by(categoryID = 5)
+gpuChoices = [(row.productID, row.productName) for row in possGPU]
+
+possFans = db.session.query(products).filter_by(categoryID = 6)
+fanChoices = [(row.productID, row.productName) for row in possFans]
+
+possMother = db.session.query(products).filter_by(categoryID = 7)
+motherBoardChoices = [(row.productID, row.productName) for row in possMother]
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
@@ -30,10 +51,24 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError('That username is taken. Please choose a different one.')
 
+class customBuildForm(FlaskForm):
+    CPU = SelectField('CPU', choices = cpuChoices, coerce = int)
+    Memory = SelectField('Memory', choices = memChoices, coerce =int)
+    Storage = SelectField('Storage', choices = storageChoices, coerce = int)
+    power = SelectField('Power Supply', choices = powerChoices, coerce = int)
+    gpu = SelectField('GPU', choices = gpuChoices, coerce = int)
+    fan = SelectField('Fan', choices = fanChoices, coerce = int)
+    mother = SelectField('MotherBoard', choices = motherBoardChoices, coerce = int)
+    submit = SubmitField('Submit')
+
+
+class guestCheckoutForm(FlaskForm):
+    name = StringField('Name')
+    address = StringField('Address')
+    password = StringField('password')
+    submit = SubmitField('Place order')
 
 class addNewForm(FlaskForm):
-    print(possCategories)
-    productID = IntegerField('productID', validators = [DataRequired()])
     productName = StringField('product Name')
     productPrice = IntegerField('product Price')
     categoryID = SelectField('category', choices = myChoices, coerce = int)

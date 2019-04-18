@@ -35,6 +35,29 @@ class Admin(db.Model):
 class category(db.Model):
     __table__ = db.Model.metadata.tables['category']
 
+class orders(db.Model):
+    __table_args__ = {'extend_existing': True}
+    custID = db.Column(db.Integer)
+    orderID = db.Column(db.Integer, primary_key = True)
+    totalPrice = db.Column(db.Integer)
+    def get_id(self):
+        return (self.orderID)
+    def __repr__(self):
+        return f"User('{self.orderID}')"
+
+class order_line(db.Model):
+    __table_args__ = {'extend_existing' : True}
+    order_line = db.Column(db.Integer, primary_key = True)
+    custID = db.Column(db.Integer)
+    orderID = db.Column(db.Integer)
+    quantity = db.Column(db.Integer)
+    productID = db.Column(db.Integer)
+    def get_id(self):
+        return (self.order_line)
+    def __repr__(self):
+        return f"User('{self.order_line}')"
+
+
 class products(db.Model):
     __table_args__ = {'extend_existing': True}
     productID = db.Column(db.Integer, primary_key=True)
@@ -45,7 +68,7 @@ class products(db.Model):
         return (self.productID)
         
     def __repr__(self):
-        return f"products('{self.productName}', '{self.price}')"
+        return f"products('{self.productID}','{self.productName}', '{self.price}')"
 
 
   

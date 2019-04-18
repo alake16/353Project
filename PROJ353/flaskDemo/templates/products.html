@@ -21,7 +21,11 @@
 <div class="sidenav">
   <a href="{{url_for('displayCategory', category = 1)}}">CPU</a><br>
   <a href="{{url_for('displayCategory', category = 2)}}">Memory</a><br>
-  <a href="#">Storage</a><br>
+  <a href="{{url_for('displayCategory', category = 3)}}">Storage</a><br>
+  <a href="{{url_for('displayCategory', category = 4)}}">Power Supply</a><br>
+  <a href="{{url_for('displayCategory', category = 5)}}">GPU</a><br>
+  <a href="{{url_for('displayCategory', category = 6)}}">Fans</a><br>
+  <a href="{{url_for('displayCategory', category = 7)}}">MotherBoards</a><br>
 </div>
 <div class ="main">
     {% for product in products %}

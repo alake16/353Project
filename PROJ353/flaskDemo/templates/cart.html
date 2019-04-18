@@ -7,5 +7,9 @@
 {% endfor %}
 <br>
 Total : {{total}}
-
+{%if current_user.is_authenticated%}
+<h2><a class="article-title" href="{{ url_for('userCheckout', total = total) }}">checkout</a></h2>
+{%else%}
+<h2><a class="article-title" href="{{ url_for('guestCheckout', total = total) }}">checkout</a></h2>
+{%endif%}
 {% endblock content %}

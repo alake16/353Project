@@ -136,7 +136,11 @@ def adminPage():
     
     form = addNewForm()
     if form.validate_on_submit():
-        prod = products(productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data)
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+        else:
+            picture_file = form.picture.data
+        prod = products(productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data, imageFile = picture_file)
         db.session.add(prod)
         db.session.commit()
         flash('product added', 'sucess')

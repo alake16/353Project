@@ -69,10 +69,11 @@ class guestCheckoutForm(FlaskForm):
     submit = SubmitField('Place order')
 
 class addNewForm(FlaskForm):
-    productName = StringField('product Name')
-    productPrice = IntegerField('product Price')
-    categoryID = SelectField('category', choices = myChoices, coerce = int)
-    submit = SubmitField('ADD')
+    productName = StringField('Product Name')
+    productPrice = StringField('Product Price')
+    categoryID = SelectField('Category', choices = myChoices, coerce = int)
+    picture = FileField('Product Image', validators=[FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Add')
 
 
 class LoginForm(FlaskForm):

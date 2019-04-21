@@ -4,11 +4,11 @@ create table users(userID int Primary Key, name varchar(20),
 	address varchar(100), password varchar(60))
 	
 CREATE TABLE products (
-    productID int, 
+    productID int NOT NULL AUTO_INCREMENT, 
     productName varchar(100), 
-	price VARCHAR(10), 
+	productPrice float, 
     categoryID int,
-    image_file VARCHAR(20),
+    imageFile VARCHAR(50) NOT NULL,
     PRIMARY KEY (productID),
     UNIQUE (productName),
     FOREIGN KEY (categoryID) references category(categoryID)

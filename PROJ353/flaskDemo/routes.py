@@ -140,7 +140,7 @@ def adminPage():
             picture_file = save_picture(form.picture.data)
         else:
             picture_file = form.picture.data
-        prod = products(productName = form.productName.data, price = form.productPrice.data, categoryID = form.categoryID.data, imageFile = picture_file)
+        prod = products(productName = form.productName.data, productPrice = form.productPrice.data, categoryID = form.categoryID.data, imageFile = picture_file)
         db.session.add(prod)
         db.session.commit()
         flash('product added', 'sucess')
@@ -196,7 +196,7 @@ def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    picture_path = os.path.join(app.root_path, 'static/product_images', picture_fn)
 
     output_size = (125, 125)
     i = Image.open(form_picture)

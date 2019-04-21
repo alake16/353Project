@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, DateField, SelectField, HiddenField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, DateField, SelectField, HiddenField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError,Regexp
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flaskDemo import db
@@ -70,7 +70,7 @@ class guestCheckoutForm(FlaskForm):
 
 class addNewForm(FlaskForm):
     productName = StringField('Product Name')
-    productPrice = StringField('Product Price')
+    productPrice = DecimalField('Product Price')
     categoryID = SelectField('Category', choices = myChoices, coerce = int)
     picture = FileField('Product Image', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Add')

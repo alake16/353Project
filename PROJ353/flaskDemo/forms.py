@@ -70,9 +70,8 @@ class guestCheckoutForm(FlaskForm):
 
 class addNewForm(FlaskForm):
     productName = StringField('Product Name')
-    productPrice = DecimalField('Product Price')
+    productPrice = IntegerField('Product Price')
     categoryID = SelectField('Category', choices = myChoices, coerce = int)
-    picture = FileField('Product Image', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Add')
 
 

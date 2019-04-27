@@ -108,14 +108,14 @@ def addCart(addItem):
     prod = products.query.get(addItem)
     cartList.append(prod)
     for row in cartList:
-        price += row.price
+        price += row.productPrice
     return render_template('cart.html', cart = cartList, title = 'Cart', total = price)
 
 @app.route("/cart", methods = ['GET', 'POST'])
 def cart():
     price = 0
     for row in cartList:
-        price += row.price
+        price += row.productPrice
     return render_template('cart.html', cart = cartList, title = 'Cart', total = price)
 
 @app.route("/displayCategory/<category>", methods = ['GET', 'POST'])
@@ -136,11 +136,7 @@ def adminPage():
     
     form = addNewForm()
     if form.validate_on_submit():
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-        else:
-            picture_file = form.picture.data
-        prod = products(productName = form.productName.data, productPrice = form.productPrice.data, categoryID = form.categoryID.data, imageFile = picture_file)
+        prod = products(productName = form.productName.data, productPrice = form.productPrice.data, categoryID = form.categoryID.data)
         db.session.add(prod)
         db.session.commit()
         flash('product added', 'sucess')
@@ -190,20 +186,6 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('home'))
-
-
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/product_images', picture_fn)
-
-    output_size = (125, 125)
-    i = Image.open(form_picture)
-    i.thumbnail(output_size)
-    i.save(picture_path)
-
-    return picture_fn
 
 
 @app.route("/account", methods=['GET', 'POST'])

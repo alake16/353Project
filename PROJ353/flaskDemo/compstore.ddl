@@ -6,9 +6,8 @@ create table users(userID int Primary Key, name varchar(20),
 CREATE TABLE products (
     productID int NOT NULL AUTO_INCREMENT, 
     productName varchar(100), 
-	productPrice float, 
+	productPrice DECIMAL(10,2), 
     categoryID int,
-    imageFile VARCHAR(50) NOT NULL,
     PRIMARY KEY (productID),
     UNIQUE (productName),
     FOREIGN KEY (categoryID) references category(categoryID)

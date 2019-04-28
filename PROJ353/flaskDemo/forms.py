@@ -70,7 +70,7 @@ class guestCheckoutForm(FlaskForm):
 
 class addNewForm(FlaskForm):
     productName = StringField('Product Name')
-    productPrice = IntegerField('Product Price')
+    productPrice = DecimalField('Product Price')
     categoryID = SelectField('Category', choices = myChoices, coerce = int)
     submit = SubmitField('Add')
 

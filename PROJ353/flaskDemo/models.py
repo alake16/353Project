@@ -62,7 +62,7 @@ class products(db.Model):
     __table_args__ = {'extend_existing': True}
     productID = db.Column(db.Integer, primary_key=True)
     productName = db.Column(db.String(100), nullable=False)
-    productPrice = db.Column(db.Integer),
+    productPrice = db.Column(db.DECIMAL(10,2))
     categoryID = db.Column(db.Integer)
     def get_id(self):
         return (self.productID)

@@ -1,9 +1,10 @@
 import os
+import mysql.connector
 import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskDemo import app, db, bcrypt
-from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm
+from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm, editProductForm
 from flaskDemo.models import Users, products, Admin, orders, order_line, category
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
@@ -17,7 +18,23 @@ def home():
     Admins = db.session.query(Admin.adminID)
     for row in Admins:
         print (row[0])
-    return render_template('home.html', title='home')
+    
+    try:
+        conn=mysql.connector.connect(host='45.55.59.121',database='compstore',user='compstore',password='453compstore')
+        if conn.is_connected():
+            print('Connected to MySQL database')
+            cursor = conn.cursor()
+            cursor.execute("SELECT users.name, users.address, admin.adminID FROM users inner join admin on users.userID = admin.adminID where userID in (select adminID from admin)")
+            row = cursor.fetchall()
+            print(row)
+            cursor = conn.cursor()
+            cursor.execute("select count(userID) from users")
+            count = cursor.fetchone()
+            print(count[0])
+    finally:
+        conn.close()
+    
+    return render_template('home.html', title='home', user = row, count = count[0])
 
 
 @app.route("/order/<total>", methods = ['GET','POST'])
@@ -99,8 +116,32 @@ def displayProducts():
 @app.route("/product/<productID>", methods = ['GET', 'POST'])
 def indiProduct(productID):
     indiProd = products.query.get(productID)
+    myList = products.query.join(category, products.categoryID==category.categoryID).add_columns(products.productID, category.categoryname).filter(products.productID == productID)
     
-    return render_template('indiProd.html', title = 'indiProd',product = indiProd)
+    name = myList[0].categoryname
+#    prod = myList['1']
+#    mycategory = prod[categoryname]
+
+    
+    return render_template('indiProd.html', title = 'indiProd',product = indiProd, categoryName = name)
+
+@app.route("/editProduct/<productID>", methods = ['GET', 'POST'])
+def editProduct(productID):
+    indiProd = products.query.get(productID)
+    form = editProductForm()
+    if form.validate_on_submit():
+        indiProd.productPrice = form.price.data
+        db.session.commit()
+        return redirect(url_for('deletePage'))
+    return render_template('editProd.html', title = 'editProd',product = indiProd, form=form)
+
+@app.route("/removeProd/<productID>", methods = ['GET', 'POST'])
+def removeProd(productID):
+    prod = products.query.get(productID)
+    db.session.delete(prod)
+    db.session.commit()
+    flash('product deleted', 'success')
+    return redirect(url_for('deletePage'))
 
 @app.route("/cart/<addItem>", methods = ['GET', 'POST'])
 def addCart(addItem):
@@ -142,6 +183,12 @@ def adminPage():
         flash('product added', 'sucess')
         return redirect(url_for('adminPage'))
     return render_template('admin.html', title = 'ADMIN', form =form)
+
+@app.route("/delete", methods = ['Get', 'POST'])
+@login_required
+def deletePage():
+    prods = products.query.all()
+    return render_template('delete.html', title = 'DELETE', prods = prods)
 
 
 

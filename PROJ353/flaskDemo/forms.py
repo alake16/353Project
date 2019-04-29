@@ -51,6 +51,11 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError('That username is taken. Please choose a different one.')
 
+class editProductForm(FlaskForm):
+    price = IntegerField('NEW PRICE')
+    submit = SubmitField('CHANGE PRICE')
+
+
 class customBuildForm(FlaskForm):
     CPU = SelectField('CPU', choices = cpuChoices, coerce = int)
     Memory = SelectField('Memory', choices = memChoices, coerce =int)

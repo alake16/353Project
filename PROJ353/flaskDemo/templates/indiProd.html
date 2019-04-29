@@ -4,6 +4,7 @@
 <a class="mr-2" href="#">{{ product["productName"] }}</a>
 Price: $
 <a class="mr-2" href="#">{{ product["productPrice"] }}</a>
+Category: {{categoryName}}
 <img src="../static/product_images/{{product['productName']}}.jpg">
 <h2><a class="article-title" href="{{ url_for('addCart', addItem = product['productID']) }}">Add to Cart</a></h2>
 </div>

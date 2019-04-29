@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class ="main">
+    {% for product in prods %}
+        <article class="media content-section">
+          <img src="../static/product_images/{{product['productName']}}.jpg">
+          <h1><a class="article-title" href="{{ url_for('editProduct', productID=product['productID'])}}"> {{ product["productID"] }}</a></h1>
+
+
+        </article>
+    {% endfor %}
+</div>
+
+{% endblock content %}

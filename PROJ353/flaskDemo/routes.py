@@ -95,12 +95,12 @@ def guestCheckout(total):
     form = guestCheckoutForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = Users(name=form.username.data, address=form.address.data, password=hashed_password)
+        user = Users(name=form.name.data, address=form.address.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        login_user(user, remember=form.remember.data)
+        
         return redirect(url_for('home'))
-    return render_template('guestCheckOut.html', form = form )
+    return render_template('guestCheckOut.html', form = form, total = total )
 
 
 
@@ -170,11 +170,9 @@ def displayCategory(category):
 def adminPage():
     possCategories = category.query.all()
     myChoices = [(row.categoryID, row.categoryname) for row in possCategories]
-    print(myChoices)
+    
     possMem = db.session.query(products).filter_by(categoryID = 2)
     memChoices = [(row.productID, row.productName) for row in possMem]
-    print(memChoices)
-    
     form = addNewForm()
     if form.validate_on_submit():
         prod = products(productName = form.productName.data, productPrice = form.productPrice.data, categoryID = form.categoryID.data)

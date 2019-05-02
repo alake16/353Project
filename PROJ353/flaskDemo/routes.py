@@ -4,8 +4,8 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskDemo import app, db, bcrypt
-from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm, editProductForm
-from flaskDemo.models import Users, products, Admin, orders, order_line, category
+from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm, editProductForm, addCompatibilityRestrictionForm
+from flaskDemo.models import Users, products, Admin, orders, order_line, category, compatibility_restriction
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 from sqlalchemy import func
@@ -106,17 +106,43 @@ def guestCheckout(total):
 
 @app.route("/products", methods=['GET','POST'])
 def displayProducts():
-    productsList = db.session.query(products.productName, products.productID).all()
+    productsList = db.session.query(products.productName, products.productID, products.productPrice).all()
     displayProduct = list()
     for row in productsList:
         print (row)
     return render_template('products.html', products = productsList, title = 'products')
 
+@app.route("/budgetCPUs", methods=['GET','POST'])
+def budgetCPUs():
+    productsList = db.session.query(products.productName, products.productID, products.productPrice)\
+    .join(category, products.categoryID==category.categoryID).filter(category.categoryName=='CPU',\
+                                                                     products.productPrice < 300.00)
+
+    return render_template('products.html', products = productsList, title = 'products')  
+
+@app.route("/premiumCPUs", methods=['GET','POST'])
+def premiumCPUs():
+    try:
+        conn=mysql.connector.connect(host='45.55.59.121',database='compstore',user='compstore',password='453compstore')
+        if conn.is_connected():
+            print('Connected to MySQL database')
+            cursor = conn.cursor()
+            cursor.execute("SELECT products.productName, products.productID, products.productPrice \
+                FROM products, category WHERE products.productPrice > 300.00 AND category.categoryName='CPU'\
+                 AND products.categoryID=category.categoryID")
+            productsList = cursor.fetchall()
+            print(productsList)
+    finally:
+        conn.close()
+
+    return render_template('products.html', products = productsList, title = 'products')
+
+
 
 @app.route("/product/<productID>", methods = ['GET', 'POST'])
 def indiProduct(productID):
     indiProd = products.query.get(productID)
-    myList = products.query.join(category, products.categoryID==category.categoryID).add_columns(products.productID, category.categoryname).filter(products.productID == productID)
+    myList = products.query.join(category, products.categoryID==category.categoryID).add_columns(products.productID, category.categoryname, products.productPrice).filter(products.productID == productID)
     
     name = myList[0].categoryname
 #    prod = myList['1']
@@ -155,9 +181,26 @@ def addCart(addItem):
 @app.route("/cart", methods = ['GET', 'POST'])
 def cart():
     price = 0
+    productsInCartList = []
+    compatibilityRestrictions = []
     for row in cartList:
         price += row.productPrice
-    return render_template('cart.html', cart = cartList, title = 'Cart', total = price)
+        productsInCartList.append(row.productID)
+
+    for productA in productsInCartList:
+        for productB in productsInCartList:
+            for row in db.session.query(compatibility_restriction):
+                if (productA == row.productAID and productB == row.productBID):
+                    newCompatibilityRestriction = [db.session.query(products).filter_by(productID=productA).first(), db.session.query(products).filter_by(productID=productB).first()]
+                    compatibilityRestrictions.append(newCompatibilityRestriction)
+                # elif (productB == row.productAID and productA == row.productBID):
+                #     newCompatibilityRestriction = [db.session.query(products).filter_by(productID=productA).first(), db.session.query(products).filter_by(productID=productB).first()]
+                #     compatibilityRestrictions.append(newCompatibilityRestriction)
+
+    # for compatibilityRestriction in compatibilityRestrictions:
+    #     print(db.session.query(products).filter_by(productID=compatibilityRestriction[0]).first())
+
+    return render_template('cart.html', cart = cartList, compatibilityRestrictions=compatibilityRestrictions, title = 'Cart', total = price)
 
 @app.route("/displayCategory/<category>", methods = ['GET', 'POST'])
 def displayCategory(category):
@@ -183,6 +226,19 @@ def adminPage():
         flash('product added', 'sucess')
         return redirect(url_for('adminPage'))
     return render_template('admin.html', title = 'ADMIN', form =form)
+
+@app.route("/addCompatibilityRestriction", methods = ['Get', 'POST'])
+@login_required
+def addCompatibilityRestriction():
+    
+    form = addCompatibilityRestrictionForm()
+    if form.validate_on_submit():
+        compatibilityRestriction = compatibility_restriction(productAID = form.productAName.data, productBID = form.productBName.data)
+        db.session.add(compatibilityRestriction)
+        db.session.commit()
+        flash('compatibility restriction added', 'sucess')
+        return redirect(url_for('addCompatibilityRestriction'))
+    return render_template('addCompatibilityRestriction.html', title = 'Add Compatibility Restriction', form=form)
 
 @app.route("/delete", methods = ['Get', 'POST'])
 @login_required

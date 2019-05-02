@@ -22,6 +22,16 @@ create table order_line(order_line int primary key, orderID int, quantity int,
 	
 create table category(categoryID int primary key, categoryname varchar(100))
 
+create table compatibility_restriction(
+	productAID int NOT NULL,
+	productBID int NOT NULL,
+
+	PRIMARY KEY (productAID, productBID),
+
+	FOREIGN KEY (productAID) references products(productID),
+	FOREIGN KEY (productBID) references products(productID)
+)
+
 alter table admin add foreign key (adminID) references users.userID
 
 alter table orders add foreign key(custID) references users.userID

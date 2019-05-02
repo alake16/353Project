@@ -36,6 +36,9 @@ fanChoices = [(row.productID, row.productName) for row in possFans]
 possMother = db.session.query(products).filter_by(categoryID = 7)
 motherBoardChoices = [(row.productID, row.productName) for row in possMother]
 
+products = products.query.all()
+productsChoices = [(row.productID, row.productName) for row in products]
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)])
@@ -77,6 +80,11 @@ class addNewForm(FlaskForm):
     productName = StringField('Product Name')
     productPrice = DecimalField('Product Price')
     categoryID = SelectField('Category', choices = myChoices, coerce = int)
+    submit = SubmitField('Add')
+
+class addCompatibilityRestrictionForm(FlaskForm):
+    productAName = SelectField('Product A', choices = productsChoices, coerce = int)
+    productBName = SelectField('Product B', choices = productsChoices, coerce = int)
     submit = SubmitField('Add')
 
 

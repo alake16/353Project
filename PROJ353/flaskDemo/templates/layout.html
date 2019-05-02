@@ -38,6 +38,7 @@
               <a class="nav-item nav-link" href="{{ url_for('cart') }}">Cart</a>
               {%if current_user.get_id() ==1%}
               <a class="nav-item nav-link" href="{{ url_for('adminPage') }}">admin</a>
+              <a class="nav-item nav-link" href="{{ url_for('addCompatibilityRestriction') }}">Add Compatibility Restriction</a>
               {%endif%}
               <a class="nav-item nav-link" href="{{ url_for('customBuild') }}">Build Your Own</a>
             </div>

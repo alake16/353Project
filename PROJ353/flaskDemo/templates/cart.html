@@ -6,6 +6,15 @@
     </article>
 {% endfor %}
 <br>
+
+<h3>The following compatibility issues exist with the products in your cart:</h3>
+{% for compatibilityRestriction in compatibilityRestrictions %}
+    <article class="media content-section">
+      <a class="mr-2" href="#">{{ compatibilityRestriction[0]['productName'] }}</a> is not compatible with <a class="mr-2" href="#">{{ compatibilityRestriction[1]['productName'] }}</a>
+    </article>
+{% endfor %}
+<br>
+
 Total : {{total}}
 {%if current_user.is_authenticated%}
 <h2><a class="article-title" href="{{ url_for('userCheckout', total = total) }}">checkout</a></h2>

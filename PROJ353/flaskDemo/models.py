@@ -33,7 +33,13 @@ class Admin(db.Model):
         return f"User('{self.adminID}')"
 
 class category(db.Model):
-    __table__ = db.Model.metadata.tables['category']
+    __table_args__ = {'extend_existing': True}
+    categoryID = db.Column(db.Integer, primary_key=True)
+    categoryName = db.Column(db.String(100))
+    def get_id(self):
+        return (self.categoryID)
+    def __repr__(self):
+        return f"User('{self.categoryID}')"
 
 class orders(db.Model):
     __table_args__ = {'extend_existing': True}
@@ -69,6 +75,15 @@ class products(db.Model):
         
     def __repr__(self):
         return f"products('{self.productID}','{self.productName}', '{self.productPrice}')"
+
+class compatibility_restriction(db.Model):
+    __table_args__ = {'extend_existing' : True}
+    productAID = db.Column(db.Integer, primary_key = True)
+    productBID = db.Column(db.Integer, primary_key = True)
+    def get_id(self):
+        return (self.productAID, self.productBID)
+    def __repr__(self):
+        return f"User('{self.productAID, self.productBID}')"
 
 
   

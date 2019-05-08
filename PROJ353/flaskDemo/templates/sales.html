@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{%block content%}
+
+<table style="width:100%">
+  <tr>
+     <th> PRODUCT </th>
+     <th style="text-align:right"> TOTAL SALES </th>
+  </tr>
+{% for element in list %}
+  <tr>
+    <th>{{ element['pname'] }}</th>
+    <th style="text-align:right"> {{ element['TS']}}</th>
+
+  </tr>
+{%endfor%}
+</table>
+
+{%endblock content%}

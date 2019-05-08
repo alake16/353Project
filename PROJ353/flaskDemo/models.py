@@ -21,7 +21,7 @@ class Users(db.Model, UserMixin):
     def get_id(self):
         return (self.userID)
     def __repr__(self):
-        return f"User('{self.username}')"
+        return f"User('{self.name}', '{self.address}')"
 
 
 class Admin(db.Model):
@@ -31,6 +31,28 @@ class Admin(db.Model):
         return (self.adminID)
     def __repr__(self):
         return f"User('{self.adminID}')"
+
+class employees(db.Model):
+    __table_args__ = {'extend_existing': True}
+    EID = db.Column(db.Integer, primary_key=True)
+    DID = db.Column(db.Integer)
+    payrate = db.Column(db.DECIMAL)
+    def get_id(self):
+        return (self.EID)
+    def __repr__(self):
+        return f"Employee('{self.EID}', '{self.DID}', '{self.payrate}')"
+
+class payroll(db.Model):
+    __table_args__ = {'extend_existing' : True}
+    PRID = db.Column(db.Integer, primary_key = True)
+    EID = db.Column(db.Integer)
+    hours = db.Column(db.DECIMAL)
+    SD = db.Column(db.DateTime)
+    ED = db.Column(db.DateTime)
+    def get_id(self):
+        return (self.PRID)
+    def __repr__(self):
+        return f"payroll( '{self.EID}', '{self.hours}', '{self.SD}', '{self.ED}')"
 
 class category(db.Model):
     __table_args__ = {'extend_existing': True}
@@ -44,12 +66,12 @@ class category(db.Model):
 class orders(db.Model):
     __table_args__ = {'extend_existing': True}
     custID = db.Column(db.Integer)
-    orderID = db.Column(db.Integer, primary_key = True)
+    orderid = db.Column(db.Integer, primary_key = True)
     totalPrice = db.Column(db.Integer)
     def get_id(self):
-        return (self.orderID)
+        return (self.orderid)
     def __repr__(self):
-        return f"User('{self.orderID}')"
+        return f"User('{self.orderid}')"
 
 class order_line(db.Model):
     __table_args__ = {'extend_existing' : True}
@@ -61,7 +83,7 @@ class order_line(db.Model):
     def get_id(self):
         return (self.order_line)
     def __repr__(self):
-        return f"User('{self.order_line}')"
+        return f"order_line('{self.order_line}', '{self.orderID}', '{self.custID}', '{self.productID}' )"
 
 
 class products(db.Model):
@@ -75,6 +97,28 @@ class products(db.Model):
         
     def __repr__(self):
         return f"products('{self.productID}','{self.productName}', '{self.productPrice}')"
+
+class orderstofufill(db.Model):
+    __table_args__ = {'extend_existing': True}
+    PK = db.Column(db.Integer, primary_key=True)
+    OID = db.Column(db.Integer)
+    def get_id(self):
+        return (self.PK)
+    
+    def __repr__(self):
+        return f"ordersToFufill('{self.OID}', '{self.PK}')"
+
+class sales(db.Model):
+    __table_args__ = {'extend_existing': True}
+    SID = db.Column(db.Integer, primary_key = True )
+    PID = db.Column(db.Integer)
+    TS = db.Column(db.DECIMAL)
+    def get_id(self):
+        return (self.PK)
+    
+    def __repr__(self):
+        return f"sales('{self.PID}', '{self.TS}')"
+
 
 class compatibility_restriction(db.Model):
     __table_args__ = {'extend_existing' : True}

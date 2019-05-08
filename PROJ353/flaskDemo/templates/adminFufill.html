@@ -1,0 +1,17 @@
+
+
+{% extends "layout.html" %}
+{% block content %}
+<div class ="main">
+    {% for order in orders %}
+        <article class="media content-section">
+
+          <h1><a class="article-title" href="{{ url_for('indiOrder', OID=order)}}">{{ order }}</a></h1>
+
+
+
+        </article>
+    {% endfor %}
+</div>
+
+{% endblock content %}

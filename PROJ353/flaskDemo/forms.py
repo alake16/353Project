@@ -1,12 +1,22 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField, DateField, SelectField, HiddenField, DecimalField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, IntegerField,  SelectField, HiddenField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError,Regexp
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flaskDemo import db
-from flaskDemo.models import Users, category, products
+from flaskDemo.models import Users, category, products, employees
 from wtforms.fields.html5 import DateField
+
+eList = list()
+possEID = employees.query.all()
+#eChoices = [(row.EID, row.productName) for row in possCPU]
+for row in possEID:
+    thisEmpl = Users.query.filter_by(userID = row.EID).first()
+    dict = {'EID' : row.EID, 'name' :  thisEmpl.name}
+    eList.append(dict)
+eChoices = [(row['EID'], row['name']) for row in eList]
+
 
 possCategories = category.query.all()
 myChoices = [(row.categoryID, row.categoryname) for row in possCategories]
@@ -53,6 +63,14 @@ class RegistrationForm(FlaskForm):
         user = Users.query.filter_by(name=username.data).first()
         if user:
             raise ValidationError('That username is taken. Please choose a different one.')
+
+class payrollForm(FlaskForm):
+    name = SelectField('Employee', choices = eChoices, coerce = int)
+    hours = IntegerField('Hours')
+    SD = DateField('Start Date',  format='%Y-%m-%d')
+    ED = DateField('End Date')
+    submit = SubmitField('SUBMIT')
+
 
 class editProductForm(FlaskForm):
     price = IntegerField('NEW PRICE')

@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+
+Customer: {{customer}}<br>
+Address: {{address}}<br>
+Order: {{order}}
+<div class ="main">
+    {% for prod in prods %}
+        <article class="media content-section">
+
+      {{prod}}
+
+
+
+        </article>
+    {% endfor %}
+</div>
+
+<a class="article-title" href="{{ url_for('Shipped', OID=order)}}">SHIPPED</a>
+
+{% endblock content %}

@@ -14,7 +14,7 @@
 }
 .main {
   margin-left: 140px; /* Same width as the sidebar + left position in px */
-  font-size: 28px; /* Increased text to enable scrolling */
+  font-size: 14px; /* Increased text to enable scrolling */
   padding: 0px 10px;
 }
 </style>
@@ -30,14 +30,16 @@
   <a href="{{url_for('displayCategory', category = 7)}}">MotherBoards</a><br>
 </div>
 <div class ="main">
+  <table style="width:100%" border="1">
+    <tr>
+        <th> Product </th>
+        <th> Price </th>
+    </tr>
     {% for product in products %}
-        <article class="media content-section">
-
-          <h1><a class="article-title" href="{{ url_for('indiProduct', productID=product[1])}}">{{ product[0] }}</a></h1>
-          <p>${{ product[2] }}</p>
-
-
-        </article>
+    <tr>
+        <th><a class="article-title" href="{{ url_for('indiProduct', productID=product[1])}}">{{ product[0] }}   </a></th>
+        <th>${{ product[2] }}</th>
+    </tr>
     {% endfor %}
 </div>
 

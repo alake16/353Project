@@ -1,13 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
+<table style="width:100%" border="1">
+  <tr>
+    <th> Product</th>
+    <th> Price </th>
+  </tr>
 {% for product in products %}
-    <article class="media content-section">
+    <tr>
 
-      <h1><a class="article-title" href="{{ url_for('indiProduct', productID=product["productID"])}}">{{ product["productName"] }}</a></h1>
-      <p>${{ product['productPrice'] }}</p>
+      <th><a class="article-title" href="{{ url_for('indiProduct', productID=product["productID"])}}">{{ product["productName"] }}</a></th>
+      <th>${{ product['productPrice'] }}</th>
 
 
-    </article>
+    </tr>
 {% endfor %}
-<h1><a class="article-title" href="{{ url_for('displayProducts')}}">Back to all products</a></h1>
+<h3><a class="article-title" href="{{ url_for('displayProducts')}}">Back to all products</a></h3>
 {% endblock content %}

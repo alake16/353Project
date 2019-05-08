@@ -4,38 +4,97 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskDemo import app, db, bcrypt
-from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm, editProductForm, addCompatibilityRestrictionForm
-from flaskDemo.models import Users, products, Admin, orders, order_line, category, compatibility_restriction
+from flaskDemo.forms import RegistrationForm, LoginForm, UpdateAccountForm, addNewForm, guestCheckoutForm, customBuildForm, editProductForm, addCompatibilityRestrictionForm, payrollForm
+from flaskDemo.models import Users, products, Admin, orders, order_line, category, compatibility_restriction, orderstofufill, sales, employees, payroll
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 from sqlalchemy import func
-
 cartList = list()
 
 
 @app.route("/home")
 def home():
     Admins = db.session.query(Admin.adminID)
-    for row in Admins:
-        print (row[0])
+   
     
     try:
         conn=mysql.connector.connect(host='45.55.59.121',database='compstore',user='compstore',password='453compstore')
         if conn.is_connected():
-            print('Connected to MySQL database')
             cursor = conn.cursor()
             cursor.execute("SELECT users.name, users.address, admin.adminID FROM users inner join admin on users.userID = admin.adminID where userID in (select adminID from admin)")
             row = cursor.fetchall()
-            print(row)
+           
             cursor = conn.cursor()
             cursor.execute("select count(userID) from users")
             count = cursor.fetchone()
-            print(count[0])
+    
     finally:
         conn.close()
     
     return render_template('home.html', title='home', user = row, count = count[0])
 
+@app.route("/employeeInfo/<myID>", methods = ['GET', 'POST'])
+def emplInfo(myID):
+    user = Users.query.filter_by(userID = myID).first()
+    empl = employees.query.filter_by(EID = myID).first()
+    stubs = payroll.query.filter_by(EID = myID).all()
+    paylist = list()
+    for row in stubs:
+        newelement = row.hours * empl.payrate
+        paylist.append(newelement)
+    return render_template('employeeInfo.html', name = user.name, ID = myID, dept = empl.DID, stubs = stubs, payrate = empl.payrate, paylist = paylist)
+
+@app.route("/payroll", methods = ['GET', 'POST'])
+def payrollPage():
+    form = payrollForm()
+    if form.validate_on_submit():
+        newPayRoll = payroll(EID = form.name.data, hours = form.hours.data, SD = form.SD.data, ED = form.ED.data)
+        db.session.add(newPayRoll)
+        db.session.commit()
+        return redirect(url_for('home'))
+    return render_template('payroll.html', form = form)
+
+@app.route("/sales", methods = ['GET', 'POST'])
+def salesfunc():
+    prods = products.query.all()
+    prodSalesList = list()
+    for row in prods:
+        salesData = sales.query.filter_by(PID = row.productID).all()
+        prodSalesDict = {'pname': row.productName, 'TS' : salesData[0].TS}
+        prodSalesList.append(prodSalesDict)
+
+    return render_template('sales.html', list = prodSalesList)
+
+
+
+@app.route("/adminFufill", methods = ['GET', 'POST'])
+def adminFufill():
+    orderList = list()
+    orders = orderstofufill.query.all()
+    for a in orders:
+        orderList.append(a.OID)
+    return render_template('adminFufill.html', orders = orderList)
+
+@app.route("/indiOrder/<OID>", methods = ['GET', 'POST'])
+def indiOrder(OID):
+    thisOrder = orders.query.get(OID)
+    prods = order_line.query.filter_by(orderID = thisOrder.orderid).all()
+    customer = prods[0].custID
+    order = prods[0].orderID
+    customerName = Users.query.get(customer)
+    PNs = list()
+    for row in prods:
+        thisprod = products.query.filter_by(productID = row.productID).all()
+        PNs.append(thisprod[0].productName)
+    return render_template('indiOrder.html', prods = PNs, customer = customerName.name, address = customerName.address, order = order)
+
+@app.route("/Shipped/<OID>", methods = ['GET', 'POST'])
+def Shipped(OID):
+    rm = orderstofufill.query.filter_by(OID = OID).all()
+    for row in rm:
+        db.session.delete(row)
+    db.session.commit()
+    return redirect(url_for('home'))
 
 @app.route("/order/<total>", methods = ['GET','POST'])
 def order(total):
@@ -43,14 +102,22 @@ def order(total):
     newOrder = orders(custID = user.userID, totalPrice = total)
     db.session.add(newOrder)
     db.session.commit()
+    
     return redirect(url_for('orderLine'))
 
 @app.route("/orderLine", methods = ['GET', 'POST'])
 def orderLine():
     user = Users.query.get(current_user.get_id())
-    orderNumber = db.session.query(func.max(orders.orderID)).scalar()
+    orderNumber = db.session.query(func.max(orders.orderid)).scalar()
+    newOTF = orderstofufill(OID = orderNumber)
+    db.session.add(newOTF)
+    db.session.commit()
     for row in cartList:
-        newOrderLine = order_line( orderID = orderNumber,custID = user.userID, quantity = 1, productID = row.productID)
+        getSalesData = sales.query.filter_by(PID = row['ID']).first()
+        getProductData = products.query.filter_by(productID = row['ID']).first()
+        getSalesData.TS = getSalesData.TS + getProductData.productPrice
+        db.session.commit()
+        newOrderLine = order_line( orderID = orderNumber,custID = user.userID, quantity = 1, productID = row['ID'])
         db.session.add(newOrderLine)
         db.session.commit()
     return redirect(url_for('home'))
@@ -108,8 +175,7 @@ def guestCheckout(total):
 def displayProducts():
     productsList = db.session.query(products.productName, products.productID, products.productPrice).all()
     displayProduct = list()
-    for row in productsList:
-        print (row)
+    
     return render_template('products.html', products = productsList, title = 'products')
 
 @app.route("/budgetCPUs", methods=['GET','POST'])
@@ -125,13 +191,13 @@ def premiumCPUs():
     try:
         conn=mysql.connector.connect(host='45.55.59.121',database='compstore',user='compstore',password='453compstore')
         if conn.is_connected():
-            print('Connected to MySQL database')
+            
             cursor = conn.cursor()
             cursor.execute("SELECT products.productName, products.productID, products.productPrice \
                 FROM products, category WHERE products.productPrice > 300.00 AND category.categoryName='CPU'\
                  AND products.categoryID=category.categoryID")
             productsList = cursor.fetchall()
-            print(productsList)
+    
     finally:
         conn.close()
 
@@ -173,9 +239,17 @@ def removeProd(productID):
 def addCart(addItem):
     price = 0
     prod = products.query.get(addItem)
-    cartList.append(prod)
+    check = 0
+    if cartList:
+        for row in cartList:
+            if(row['ID'] == addItem):
+                row['Q'] = row['Q'] + 1
+                check = 1
+    if check == 0:
+        cartItem = {'ID' : addItem,'name': prod.productName, 'Q' : 1, 'price': prod.productPrice}
+        cartList.append(cartItem)
     for row in cartList:
-        price += row.productPrice
+        price += row['price']
     return render_template('cart.html', cart = cartList, title = 'Cart', total = price)
 
 @app.route("/cart", methods = ['GET', 'POST'])
@@ -184,8 +258,8 @@ def cart():
     productsInCartList = []
     compatibilityRestrictions = []
     for row in cartList:
-        price += row.productPrice
-        productsInCartList.append(row.productID)
+        price += row['price']
+        productsInCartList.append(row['ID'])
 
     for productA in productsInCartList:
         for productB in productsInCartList:
@@ -193,19 +267,12 @@ def cart():
                 if (productA == row.productAID and productB == row.productBID):
                     newCompatibilityRestriction = [db.session.query(products).filter_by(productID=productA).first(), db.session.query(products).filter_by(productID=productB).first()]
                     compatibilityRestrictions.append(newCompatibilityRestriction)
-                # elif (productB == row.productAID and productA == row.productBID):
-                #     newCompatibilityRestriction = [db.session.query(products).filter_by(productID=productA).first(), db.session.query(products).filter_by(productID=productB).first()]
-                #     compatibilityRestrictions.append(newCompatibilityRestriction)
-
-    # for compatibilityRestriction in compatibilityRestrictions:
-    #     print(db.session.query(products).filter_by(productID=compatibilityRestriction[0]).first())
-
     return render_template('cart.html', cart = cartList, compatibilityRestrictions=compatibilityRestrictions, title = 'Cart', total = price)
 
 @app.route("/displayCategory/<category>", methods = ['GET', 'POST'])
 def displayCategory(category):
     prods = db.session.query(products).filter(products.categoryID.in_((category))).all()
-    print (prods)
+   
     return render_template('displayCategory.html', products = prods, title = products)
 
 @app.route("/adminPage", methods = ['Get', 'POST'])
@@ -323,9 +390,9 @@ def new_dept():
 @app.route("/add", methods=['GET', 'POST'])
 @login_required
 def add():
-    print('ADDDD')
+    
     form = addForm()
-    print('add2')
+   
     if form.validate_on_submit():
         flash('validated', 'success')
         ssnnumber = form.essn.data
@@ -341,8 +408,7 @@ def add2(ssn):
     form = add2Form()
     if form.validate_on_submit():
         pnum = form.pno.data
-        print(pnum)
-        print(ssn)
+       
         WO = Works_On(essn=ssn, pno=form.pno.data, hours=form.hours.data)
         check = Works_On.query.get([ssn,pnum])
         if check:

@@ -1,0 +1,40 @@
+{% extends "layout.html"%}
+{%block content%}
+<h1>EMPLOYEE INFO PAGE</h1>
+<br>
+
+
+<table width = 100%>
+  <tr>
+    <th> Employee ID: </th>
+    <th> Name: </th>
+    <th> Department Number: </th>
+  </tr>
+  <tr>
+      <th> {{ID}} </th>
+      <th> {{name}} </th>
+      <th> {{dept}} </th>
+  </tr>
+</table>
+<br>
+<br>
+ <h3>PAYSTUBS: </h3>
+<table width = 100%>
+  <tr>
+    <th> From: </th>
+    <th> To: </th>
+    <th> Hours Worked </th>
+    <th>  Wage Rate </th>
+    <th> Gross Earnings </th>
+  </tr>
+{%for row in stubs %}
+<tr>
+    <th> {{row.SD}} </th>
+    <th> {{row.ED}} </th>
+    <th> {{ row.hours}} </th>
+    <th> {{payrate}} </th>
+    <th> {{payrate * row.hours}}</th>
+</tr>
+{%endfor%}
+</table>
+{%endblock content%}
